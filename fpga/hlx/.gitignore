@@ -1,0 +1,14 @@
+# ignore the output directory
+build/
+.Xil/
+
+*.log
+*.jou
+*.str
+*.debug
+*.btree
+*.zip
+
+# ignore cocotb builds
+sim_build/
+*.pyc
