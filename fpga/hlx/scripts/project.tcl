@@ -111,6 +111,9 @@ proc cell {cell_vlnv cell_name {cell_props {}} {cell_ports {}}} {
 #   }
 # }
 
+# Create ports from HW design
+source config/$hw_config/ports.tcl
+
 # Create block design
 source projects/$project_name/block_design.tcl
 save_bd_design
@@ -133,8 +136,13 @@ set files [glob -nocomplain projects/$project_name/hdl/*.vhd]
 if {[llength $files] > 0} {
   add_files -norecurse $files
 }
+# Add hardware constraints
+set files [glob -nocomplain config/$hw_config/*.xdc]
+if {[llength $files] > 0} {
+  add_files -norecurse -fileset constrs_1 $files
+}
 # Add user constraints
-set files [glob -nocomplain config/*.xdc projects/$project_name/constraints/*.xdc]
+set files [glob -nocomplain projects/$project_name/constraints/*.xdc]
 if {[llength $files] > 0} {
   add_files -norecurse -fileset constrs_1 $files
 }

@@ -8,8 +8,6 @@
 
 # Project name
 NAME = pitaya-min
-# FPGA Part number
-PART = xc7z020clg484-1
 
 ################################################################################
 # Build directory
@@ -21,6 +19,10 @@ CORES = impulse_generator_v1_0
 # Command line tools
 VIVADO = vivado -log build/log.log -journal build/journal.log -mode batch
 RM = rm -rf
+
+# FPGA Part number
+PART ?= xc7z020clg484-1
+include projects/$(NAME)/Makefile.make
 
 ################################################################################
 # if make is killed or interrupted during the execution of their recipes, 

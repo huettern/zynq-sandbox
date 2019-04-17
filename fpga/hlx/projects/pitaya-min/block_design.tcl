@@ -14,7 +14,7 @@ cell xilinx.com:ip:clk_wiz pll_0 {
 
 # Create processing_system7
 cell xilinx.com:ip:processing_system7 ps_0 {
-  PCW_IMPORT_BOARD_PRESET cfg/red_pitaya.xml
+  PCW_IMPORT_BOARD_PRESET config/red-pitaya/red_pitaya.xml
   PCW_USE_S_AXI_HP0 1
 } {
   M_AXI_GP0_ACLK pll_0/clk_out1
