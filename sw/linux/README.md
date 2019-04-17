@@ -13,7 +13,7 @@ sudo ln -s /usr/bin/make /usr/bin/gmake
 
 Install some tools:
 ```
-sudo apt install curl
+sudo apt install curl u-boot-tools
 ```
 
 On VirtualBox:
@@ -31,7 +31,7 @@ sudo mount -t vboxsf -o uid=1000,gid=1000 noah /mnt/noah
 For educational build purposes, the Makefile was extended to build each component seperately.
 This guide will go through all components and briefly explain what they are needed for.
 
-1. Create FSBL
+### 1. Create FSBL
 Requires: 
 - Hardware definition exported from Vivado HLx.
 Generates: 
@@ -45,7 +45,7 @@ rm -r build/*.fsbl
 make fsbl
 ```
 
-2. Devicetree source
+### 2. Devicetree source
 Requires: 
 - Hardware definition
 - Devicetree sources download from Xilinx repository
@@ -66,12 +66,12 @@ rm -r build/*.tree
 make dts
 ```
 
-3. Linux Kernel
+### 3. Linux Kernel
 Requires: 
 - Nothing
 
 Generates:
-- uImage
+- `uImage`
 
 Now it is time to pull a vanilla Linux kernel, uncompress the sources, apply some patches, copy some config and finally build the kernel. Issue the following command and go for a walk:
 
@@ -79,3 +79,65 @@ Now it is time to pull a vanilla Linux kernel, uncompress the sources, apply som
 rm -r build/linux*
 make uimage
 ```
+
+or if the sources are already downloaded and you don't want to clean before build:
+```
+make -C build/linux-4.14 ARCH=arm xilinx_zynq_defconfig
+make -C build/linux-4.14 ARCH=arm CFLAGS=-O2 -march=armv7-a \
+ -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard \
+ -j 4 \
+ CROSS_COMPILE=arm-linux-gnueabihf- UIMAGE_LOADADDR=0x8000 uImage modules
+```
+
+### 4. U Boot
+Requires: 
+- Nothing
+
+Generates:
+- `u-boot.elf`
+
+The bootloader is build from source pulled from Xilinxed repositoriers.
+Before build, some config files are copied and patches applied.
+
+```
+rm -r build/u-boot*
+make uboot
+```
+
+### 5. Devicetree blob
+Requires: 
+- `uImage`
+- Devicetree source
+
+Generates:
+- `devicetree.dtb`
+
+Using the device tree sources generated previously, the devicetree compiler is used to generate the devicetree blob.
+
+```
+rm -r build/devicetree*
+make dtb
+```
+
+### 6. Boot image
+Requires: 
+- FSBL
+- Bit stream
+- U Boot
+
+Generates:
+- `boot.bin`
+
+Now the three binaries can be tied to a single binary image.
+
+```
+rm -r build/boot.bin
+make bootbin
+```
+
+### 7. Copy contents to SD-Card
+
+Now the following files should be put on a SD-Card:
+- boot.bin
+- devicetree.dtb
+- uImage
