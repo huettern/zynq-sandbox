@@ -83,8 +83,8 @@ make uimage
 or if the sources are already downloaded and you don't want to clean before build:
 ```
 make -C build/linux-4.14 ARCH=arm xilinx_zynq_defconfig
-make -C build/linux-4.14 ARCH=arm CFLAGS=-O2 -march=armv7-a \
- -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard \
+make -C build/linux-4.14 ARCH=arm CFLAGS="-O2 -march=armv7-a \
+ -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard" \
  -j 4 \
  CROSS_COMPILE=arm-linux-gnueabihf- UIMAGE_LOADADDR=0x8000 uImage modules
 ```
