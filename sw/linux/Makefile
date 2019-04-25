@@ -16,8 +16,8 @@ PART = xc7z020clg484-1
 PROC = ps7_cortexa9_0
 
 # Files from hlx
-BIT   = ../../fpga/hlx/build/pitaya-min.bit
-HWDEF = ../../fpga/hlx/build/pitaya-min.sdk/system_wrapper.hdf
+BIT   = ../../fpga/hlx/build/projects/pitaya-min.runs/impl_1/system_wrapper.bit
+HWDEF = ../../fpga/hlx/build/projects/pitaya-min.sdk/system_wrapper.hdf
 
 ################################################################################
 # Executables
@@ -189,6 +189,8 @@ $(BIT):
 $(FSBL): $(HWDEF)
 	mkdir -p $(@D)
 	$(HSI) -source scripts/fsbl.tcl -tclargs $(NAME) $(PROC) $(HWDEF) build/$(NAME).fsbl
+	patch -d $(@D) < patches/fsbl/fsbl.patch
+	make -C $(@D)
 
 #
 # Generate devicetree and patch it
