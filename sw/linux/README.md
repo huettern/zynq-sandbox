@@ -134,10 +134,49 @@ Now the three binaries can be tied to a single binary image.
 rm -r build/boot.bin
 make bootbin
 ```
+### 7. uEnvt.txt
+Requires: 
+- Linux compiled
+- dtb compiled
+
+Generates:
+- uEnvt.txt
+
+For u-boot to know what linux version to load we have to generate a uEnv.txt file.
+This is done by running the following command:
+
+```
+rm -r build/uEnv.txt
+make uenv
+```
 
 ### 7. Copy contents to SD-Card
 
-Now the following files should be put on a SD-Card:
+Create two partitions on a SD-Card:
+1. fat32 1.00GiB label:BOOT Flags:boot
+2. ext4 label:root
+
+Copy the following files on the boot partition:
 - boot.bin
 - devicetree.dtb
 - uImage
+- uEnv.txt
+
+### 8. First Boot!
+Connect a serial console and power up the board.
+Hit a key to interrupt u-boot automatic boot process.
+To check if the uImage and devicetree are correct issue the following commands:
+```bash
+mmcinfo
+fatload mmc 0 0x2080000 uImage
+fatload mmc 0 0x2000000 devicetree.dtb
+iminfo 0x2000000
+iminfo 0x2080000
+setenv bootargs console=ttyPS0,115200 root=/dev/mmcblk0p2 ro rootfstype=ext4 earlyprintk rootwait
+bootm 0x2080000 - 0x2000000
+```
+
+At this point the kernel should start but fail with a kernel panic because no `init` was found.
+For that we next generate the rootfs.
+
+

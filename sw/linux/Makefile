@@ -19,6 +19,9 @@ PROC = ps7_cortexa9_0
 BIT   = ../../fpga/hlx/build/projects/pitaya-min.runs/impl_1/system_wrapper.bit
 HWDEF = ../../fpga/hlx/build/projects/pitaya-min.sdk/system_wrapper.hdf
 
+# uEnv source
+UENV_SRC = source/uEnv.txt
+
 ################################################################################
 # Executables
 HSI = hsi -nolog -nojournal -mode batch
@@ -70,6 +73,7 @@ UBOOT  = build/u-boot.elf
 UIMAGE = build/uImage
 FSBL   = build/$(NAME).fsbl/executable.elf
 DTB    = build/devicetree.dtb
+UENV   = build/uEnv.txt
 
 ################################################################################
 # preciousand phony targets
@@ -88,6 +92,7 @@ fsbl: $(FSBL)
 
 dts: build/$(NAME).tree/system-top.dts
 dtb: $(DTB)
+uenv: $(UENV)
 
 bootbin: build/boot.bin
 
@@ -146,7 +151,7 @@ $(DTREE_DIR): $(DTREE_TAR)
 ################################################################################
 # Compile Linux kernel
 $(UIMAGE): $(LINUX_DIR)
-	make -C $< mrproper
+# 	make -C $< mrproper
 	make -C $< ARCH=arm xilinx_zynq_defconfig
 	make -C $< ARCH=arm CFLAGS=$(LINUX_CFLAGS) \
 		-j $(shell nproc 2> /dev/null || echo 1) \
@@ -157,7 +162,7 @@ $(UIMAGE): $(LINUX_DIR)
 # Compile u-boot bootloader
 $(UBOOT): $(UBOOT_DIR)
 	mkdir -p $(@D)
-	make -C $< mrproper
+# 	make -C $< mrproper
 	make -C $< ARCH=arm zynq_red_pitaya_defconfig
 	make -C $< ARCH=arm CFLAGS=$(UBOOT_CFLAGS) \
 		CROSS_COMPILE=arm-linux-gnueabihf- all
@@ -175,6 +180,8 @@ $(DTB): $(UIMAGE) build/$(NAME).tree/system-top.dts
 	$(LINUX_DIR)/scripts/dtc/dtc -I dts -O dtb -o $(DTB) \
 		-i build/$(NAME).tree build/$(NAME).tree/system-top.dts
 
+################################################################################
+# Errors if HLx design not completed
 $(HWDEF):
 	@echo Hardware definition not found
 	@echo Go to fpga/hlx directory and export hardware definition
@@ -183,23 +190,27 @@ $(BIT):
 	@echo Bitstream not found
 	@echo Go to fpga/hlx directory and build
 
-#
+################################################################################
 # Create first stage bootloader using Hardware Software Interface (HSI)
-#
 $(FSBL): $(HWDEF)
 	mkdir -p $(@D)
 	$(HSI) -source scripts/fsbl.tcl -tclargs $(NAME) $(PROC) $(HWDEF) build/$(NAME).fsbl
 	patch -d $(@D) < patches/fsbl/fsbl.patch
 	make -C $(@D)
 
-#
+################################################################################
 # Generate devicetree and patch it
-#
 build/%.tree/system-top.dts: $(HWDEF) $(DTREE_DIR)
 	mkdir -p $(@D)
 	$(HSI) -source scripts/devicetree.tcl -tclargs $(NAME) $(PROC) $(DTREE_DIR) $(HWDEF) build/$(NAME).tree
 # 	sed -i 's|#include|/include/|' $@
 # 	patch -d $(@D) < patches/devicetree/devicetree.patch
+
+################################################################################
+# Generate uEnv.txt
+$(UENV) : $(UENV_SRC)
+	cp $(UENV_SRC) $@
+
 
 clean:
 	$(RM) build/uImage build/boot.bin build/devicetree.dtb build
