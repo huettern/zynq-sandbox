@@ -32,6 +32,7 @@ RM = rm -rf
 UBOOT_TAG = xilinx-v2018.2
 LINUX_TAG = 4.14
 DTREE_TAG = xilinx-v2018.2
+BUSYBOX_TAG = 1.30.1
 
 ################################################################################
 # Target directories
@@ -55,7 +56,7 @@ DTREE_URL = https://github.com/Xilinx/device-tree-xlnx/archive/$(DTREE_TAG).tar.
 # Flags for compiling
 LINUX_CFLAGS = "-O2 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard"
 UBOOT_CFLAGS = "-O2 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard"
-ARMHF_CFLAGS = "-O2 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard"
+BUSYBOX_CFLAGS = "-O2 -march=armv7-a -mcpu=cortex-a9 -mtune=cortex-a9 -mfpu=neon -mfloat-abi=hard"
 
 ################################################################################
 # RTL8188 driver source
@@ -68,12 +69,19 @@ RTL8192_TAR = build/rtl8192cu-fixes-master.tar.gz
 RTL8192_URL = https://github.com/pvaret/rtl8192cu-fixes/archive/master.tar.gz
 
 ################################################################################
+# Busybox tar and source
+BUSYBOX_DIR = build/busybox-$(BUSYBOX_TAG)
+BUSYBOX_TAR = build/busybox-$(BUSYBOX_TAG).tar.bz2
+BUSYBOX_URL = https://busybox.net/downloads/busybox-$(BUSYBOX_TAG).tar.bz2
+
+################################################################################
 # Output files
-UBOOT  = build/u-boot.elf
-UIMAGE = build/uImage
-FSBL   = build/$(NAME).fsbl/executable.elf
-DTB    = build/devicetree.dtb
-UENV   = build/uEnv.txt
+UBOOT  	= build/u-boot.elf
+UIMAGE 	= build/uImage
+FSBL   	= build/$(NAME).fsbl/executable.elf
+DTB    	= build/devicetree.dtb
+UENV   	= build/uEnv.txt
+BUSYBOX = build/busybox-$(BUSYBOX_TAG)/busybox
 
 ################################################################################
 # preciousand phony targets
@@ -82,7 +90,7 @@ UENV   = build/uEnv.txt
 
 ################################################################################
 # Phony targets
-all: build/boot.bin $(UIMAGE) build/devicetree.dtb
+all: build/boot.bin $(UIMAGE) build/devicetree.dtb busybox
 
 uimage: $(UIMAGE)
 
@@ -95,6 +103,7 @@ dtb: $(DTB)
 uenv: $(UENV)
 
 bootbin: build/boot.bin
+busybox: $(BUSYBOX)
 
 ################################################################################
 # Downloads
@@ -117,6 +126,10 @@ $(RTL8188_TAR):
 $(RTL8192_TAR):
 	mkdir -p $(@D)
 	curl -L $(RTL8192_URL) -o $@
+
+$(BUSYBOX_TAR):
+	mkdir -p $(@D)
+	curl -L $(BUSYBOX_URL) -o $@
 
 ################################################################################
 # untar and patch uboot
@@ -147,6 +160,13 @@ $(LINUX_DIR): $(LINUX_TAR) $(RTL8188_TAR) $(RTL8192_TAR)
 $(DTREE_DIR): $(DTREE_TAR)
 	mkdir -p $@
 	tar -zxf $< --strip-components=1 --directory=$@
+
+################################################################################
+# Untar Busybox
+$(BUSYBOX_DIR): $(BUSYBOX_TAR)
+	mkdir -p $@
+	tar -xjf $< --strip-components=1 --directory=$@
+	cp patches/busybox/busybox_config $@/.config
 
 ################################################################################
 # Compile Linux kernel
@@ -211,7 +231,20 @@ build/%.tree/system-top.dts: $(HWDEF) $(DTREE_DIR)
 $(UENV) : $(UENV_SRC)
 	cp $(UENV_SRC) $@
 
+################################################################################
+# Build Busybox
+# $(BUSYBOX) : $(BUSYBOX_DIR)
+$(BUSYBOX) : $(BUSYBOX_DIR)
+	echo "placeholder"
+	make -C $< ARCH=arm CFLAGS=$(BUSYBOX_CFLAGS) \
+		-j $(shell nproc 2> /dev/null || echo 1) \
+		CROSS_COMPILE=arm-linux-gnueabihf- all
+	make -C $< ARCH=arm INSTALL_PATH=build/  \
+		-j $(shell nproc 2> /dev/null || echo 1) \
+		install
 
+################################################################################
+# clean stuff
 clean:
 	$(RM) build/uImage build/boot.bin build/devicetree.dtb build
 	$(RM) .Xil usage_statistics_webtalk.html usage_statistics_webtalk.xml

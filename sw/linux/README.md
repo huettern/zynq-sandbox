@@ -13,7 +13,7 @@ sudo ln -s /usr/bin/make /usr/bin/gmake
 
 Install some tools:
 ```
-sudo apt install curl u-boot-tools
+sudo apt install curl u-boot-tools libncurses-dev
 ```
 
 On VirtualBox:
@@ -179,4 +179,32 @@ bootm 0x2080000 - 0x2000000
 At this point the kernel should start but fail with a kernel panic because no `init` was found.
 For that we next generate the rootfs.
 
+### 9. Busybox
+First we try the smallest rootf available: Busybox.
+To download, untar and build, run:
 
+```bash
+make busybox
+```
+
+To modify busybox and build manually:
+```bash
+cd build/busybox-*
+make -j4 ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig
+make -j4 ARCH=arm INSTALL_PATH=build/ install
+```
+
+Now copy the installed busybox and some install scripts to the root partition of the SD-card.
+
+```bash
+./scripts/busybox-sdcard.sh /link/to/sdcard/root/
+```
+
+We should now be able bring up the network!
+```bash
+ifconfig eth0 up
+udhcpc -i eth0 -p /var/run/dhcpClient-eth0.pid
+ifconfig eth0 192.168.0.87 netmask 255.255.255.0
+route add default gw 192.168.0.1
+ping 8.8.8.8
+```
