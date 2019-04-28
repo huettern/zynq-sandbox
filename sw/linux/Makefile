@@ -106,6 +106,10 @@ bootbin: build/boot.bin
 busybox: $(BUSYBOX)
 
 ################################################################################
+# Includes
+include alpine/Makefile.mk
+
+################################################################################
 # Downloads
 $(UBOOT_TAR):
 	mkdir -p $(@D)
