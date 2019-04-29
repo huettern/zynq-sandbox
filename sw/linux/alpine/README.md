@@ -165,13 +165,208 @@ mksquashfs alpine-modloop/lib modloop -b 1048576 -comp xz -Xdict-size 100%
 ```
 
 ## Create root
-Now its time to create the root partition. 
+Now its time to create the root partition and some empty directories.
 
+### Preparations
+Create directory.
 ```bash
 root_dir=alpine-root
 mkdir -p $root_dir/usr/bin
+mkdir -p $root_dir/etc
+mkdir -p $root_dir/etc/apk
 ```
 
+Create an apk cache where the SD-card will be mounted on the target.
+```bash
+mkdir -p $root_dir/media/mmcblk0p1/cache
+ln -s /media/mmcblk0p1/cache $root_dir/etc/apk/cache
+```
+
+Copy contents from apline root dir into alpine-root.
+```bash
+cp -r alpine/root/etc $root_dir/
+```
+
+Copy alpine binary and qemu arm CPU emulator to install alpine.
+Further, for the chroot environment to find the alpine servers, our hosts resolv config is copied.
+```bash
+cp -r alpine-tools/sbin $root_dir/
+cp /usr/bin/qemu-arm-static $root_dir/usr/bin/
+cp /etc/resolv.conf $root_dir/etc/
+```
+
+We now install alpine by running apk.static in a chroot.
+- apk is the alpine packet manager
+- `--repository $alpine_url/main` tells apk which repository to use
+- `--update-cache` does what it says it does
+- `--allow-untrusted` yap, even unsigned packages
+- `--initdb` undocumented
+- `add alpine-base` tell apk to install the alpine base system
+```bash
+sudo chroot $root_dir /sbin/apk.static \
+  --repository $alpine_url/main \
+  --update-cache --allow-untrusted --initdb \
+  add alpine-base
+```
+
+Create a repositories file for upstream repository path.
+```bash
+echo $alpine_url/main > $root_dir/etc/apk/repositories
+echo $alpine_url/community >> $root_dir/etc/apk/repositories
+```
+
+### Chroot
+Now we chroot into the alpine-base installation and complete further installations.
+```bash
+sudo chroot $root_dir /bin/sh
+```
+
+#### Install some packages
+```bash
+apk update
+apk add haveged openssh iw iptables curl wget less nano bc dcron
+
+```
+
+#### init system
+Alpine-linux uses [OpenRC](https://wiki.gentoo.org/wiki/OpenRC) for its init system.
+More infos can be found [here](https://wiki.alpinelinux.org/wiki/Alpine_Linux_Init_System).
+Add services to the boot runlevel. From the alpine documentation:
+
+_Generally the only services you should add to the boot runlevel are those which deal with the mounting of filesystems, set the initial state of attached peripherals and logging_
+
+```bash
+ln -s /etc/init.d/bootmisc etc/runlevels/boot/bootmisc
+ln -s /etc/init.d/hostname etc/runlevels/boot/hostname
+ln -s /etc/init.d/hwdrivers etc/runlevels/boot/hwdrivers
+ln -s /etc/init.d/modloop etc/runlevels/boot/modloop
+ln -s /etc/init.d/swclock etc/runlevels/boot/swclock
+ln -s /etc/init.d/sysctl etc/runlevels/boot/sysctl
+ln -s /etc/init.d/syslog etc/runlevels/boot/syslog
+ln -s /etc/init.d/urandom etc/runlevels/boot/urandom
+```
+
+For the shutdown runlevel:
+
+_Changes to the shutdown runlevel and then halts the host._
+
+```bash
+ln -s /etc/init.d/killprocs etc/runlevels/shutdown/killprocs
+ln -s /etc/init.d/mount-ro etc/runlevels/shutdown/mount-ro
+ln -s /etc/init.d/savecache etc/runlevels/shutdown/savecache
+```
+
+For the sysinit runlevel:
+
+_Brings up any system specific stuff such as /dev, /proc and optionally /sys for Linux based systems_
+
+```bash
+ln -s /etc/init.d/devfs etc/runlevels/sysinit/devfs
+ln -s /etc/init.d/dmesg etc/runlevels/sysinit/dmesg
+ln -s /etc/init.d/mdev etc/runlevels/sysinit/mdev
+```
+
+Add some services to the default runlevel.
+```bash
+rc-update add local default
+rc-update add dcron default
+rc-update add haveged default
+rc-update add sshd default
+```
+
+#### Configuration
+Setup ssh deamon.
+```bash
+# permit root login
+sed -i 's/^#PermitRootLogin.*/PermitRootLogin yes/' etc/ssh/sshd_config
+```
+
+Change root password.
+```bash
+passwd=root
+echo root:$passwd | chpasswd
+```
+
+Set hostname.
+```bash
+hostname=red-pitaya
+setup-hostname $hostname
+hostname $hostname
+```
+
+Add some aliases to the root `.profile`.
+```bash
+cat <<- EOF_CAT > root/.profile
+alias rw='mount -o rw,remount /media/mmcblk0p1'
+alias ro='mount -o ro,remount /media/mmcblk0p1'
+EOF_CAT
+```
+
+Configure alpine local backup to backup to SD card partition 1.
+Also include some directories.
+`lbu` only includes `/etc` per default.
+More documentation on lbu [here](https://wiki.alpinelinux.org/wiki/Alpine_local_backup).
+```bash
+sed -i 's/^# LBU_MEDIA=.*/LBU_MEDIA=mmcblk0p1/' etc/lbu/lbu.conf
+lbu add root
+lbu delete etc/resolv.conf
+lbu delete root/.ash_history
+```
+
+Create backup
+```bash
+lbu commit -d
+```
+
+#### Finish up
+We now exit the chroot and restore our hostname.
+```bash
+exit
+sudo hostname -F /etc/hostname
+```
+
+## Create ZIP
+We now created all necessary files folders and filesystems.
+For convenience we copy all needed ressources in a new folder.
+
+```bash
+zip_dir=alpine-zip
+mkdir -p $zip_dir
+
+cp ../boot.bin $zip_dir/
+cp ../uImage $zip_dir/
+cp ../devicetree.dtb $zip_dir/
+cp ../uEnv.txt $zip_dir/
+
+cp -r $root_dir/media/mmcblk0p1/cache $zip_dir/
+cp $root_dir/media/mmcblk0p1/red-pitaya.apkovl.tar.gz $zip_dir/
+cp modloop $zip_dir/
+cp uInitrd $zip_dir/
+```
+
+| Ressource | Source | Description |
+|-|-|-|
+| boot.bin | Linux build | Contains the first stage bootloader, the initial bit file and the U-Boot bootloader |
+| uImage | Linux build | The Linux kernel image |
+| devicetree.dtb | Linux build | Devicetree binary blob |
+| uEnv.txt | Linux build | Instructions for U-Boot at boot time |
+
+| $root_dir/media/mmcblk0p1/cache | alpine |  |
+| $root_dir/media/mmcblk0p1/red-pitaya.apkovl.tar.gz | alpine | |
+| modloop | alpine | Linux kernel modules and custom alpine firmware and modules |
+| uInitrd | alpine | Initial ramdisk containing alpine linux vanilla ramdisk |
+
+Zip all files that need to be copied to the SD-Card.
+```bash
+zip -r red-pitaya-alpine-3.9-armv7-`date +%Y%m%d`.zip $zip_dir/
+```
+
+## Stuff
+Can we remove these?
+```bash
+rm $root_dir/usr/bin/qemu-arm-static
+rm $root_dir/etc/resolv.conf
+```
 
 
 ## Source
