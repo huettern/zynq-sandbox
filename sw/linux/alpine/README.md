@@ -350,7 +350,6 @@ cp uInitrd $zip_dir/
 | uImage | Linux build | The Linux kernel image |
 | devicetree.dtb | Linux build | Devicetree binary blob |
 | uEnv.txt | Linux build | Instructions for U-Boot at boot time |
-
 | $root_dir/media/mmcblk0p1/cache | alpine |  |
 | $root_dir/media/mmcblk0p1/red-pitaya.apkovl.tar.gz | alpine | |
 | modloop | alpine | Linux kernel modules and custom alpine firmware and modules |
