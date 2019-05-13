@@ -14,7 +14,7 @@ NAME = pitaya-min
 BUILD = build
 
 # Cores to build in the ./cores directory
-CORES = impulse_generator_v1_0
+CORES = impulse_generator_v1_0 blinker_v1_0 
 
 # Command line tools
 VIVADO = vivado -log build/log.log -journal build/journal.log -mode batch
@@ -68,7 +68,7 @@ cores: $(addprefix $(BUILD)/cores/, $(CORES))
 clean-cores:
 	$(RM) $(BUILD)/cores/*
 
-$(BUILD)/cores/%: cores/%/core_config.tcl cores/%/hdl/*.vhd
+$(BUILD)/cores/% : cores/%/core_config.tcl cores/%/hdl/*
 	mkdir -p $(@D)
 	cp cores/$*/*.xml $(BUILD)/cores/  || :
 	$(VIVADO) -source scripts/core.tcl -tclargs $* $(PART) $(BUILD)/cores/
