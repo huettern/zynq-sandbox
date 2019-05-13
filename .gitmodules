@@ -1,0 +1,4 @@
+[submodule "fpga/cocotb"]
+  path = fpga/cocotb
+  url = https://github.com/potentialventures/cocotb
+  branch = v1.1
