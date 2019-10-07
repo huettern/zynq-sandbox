@@ -41,3 +41,9 @@ create_bd_port -dir IO -from 7 -to 0 exp_n_tri_io
 ### LED
 
 create_bd_port -dir O -from 7 -to 0 led_o
+
+### DDR
+set DDR [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddrx_rtl:1.0 DDR ]
+
+### FIXED_IO
+set FIXED_IO [ create_bd_intf_port -mode Master -vlnv xilinx.com:display_processing_system7:fixedio_rtl:1.0 FIXED_IO ]

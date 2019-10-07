@@ -1,32 +1,5 @@
 # Copied form Vivado block design export
 
-  # Create interface ports
-  set DDR [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddrx_rtl:1.0 DDR ]
-  set FIXED_IO [ create_bd_intf_port -mode Master -vlnv xilinx.com:display_processing_system7:fixedio_rtl:1.0 FIXED_IO ]
-  set Vaux0 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_analog_io_rtl:1.0 Vaux0 ]
-  set Vaux1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_analog_io_rtl:1.0 Vaux1 ]
-  set Vaux8 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_analog_io_rtl:1.0 Vaux8 ]
-  set Vaux9 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_analog_io_rtl:1.0 Vaux9 ]
-  set Vp_Vn [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_analog_io_rtl:1.0 Vp_Vn ]
-
-  # Create ports
-  set adc_clk_n_i [ create_bd_port -dir I adc_clk_n_i ]
-  set adc_clk_p_i [ create_bd_port -dir I adc_clk_p_i ]
-  set adc_csn_o [ create_bd_port -dir O adc_csn_o ]
-  set adc_dat_a_i [ create_bd_port -dir I -from 13 -to 0 adc_dat_a_i ]
-  set adc_dat_b_i [ create_bd_port -dir I -from 13 -to 0 adc_dat_b_i ]
-  set adc_enc_n_o [ create_bd_port -dir O adc_enc_n_o ]
-  set adc_enc_p_o [ create_bd_port -dir O adc_enc_p_o ]
-  set dac_clk_o [ create_bd_port -dir O dac_clk_o ]
-  set dac_dat_o [ create_bd_port -dir O -from 13 -to 0 dac_dat_o ]
-  set dac_pwm_o [ create_bd_port -dir O -from 3 -to 0 dac_pwm_o ]
-  set dac_rst_o [ create_bd_port -dir O dac_rst_o ]
-  set dac_sel_o [ create_bd_port -dir O dac_sel_o ]
-  set dac_wrt_o [ create_bd_port -dir O dac_wrt_o ]
-  set exp_n_tri_io [ create_bd_port -dir IO -from 7 -to 0 exp_n_tri_io ]
-  set exp_p_tri_io [ create_bd_port -dir IO -from 7 -to 0 exp_p_tri_io ]
-  set led_o [ create_bd_port -dir O -from 7 -to 0 led_o ]
-
   # Create instance: blinker_v1_0_0, and set properties
   set blinker_v1_0_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:blinker_v1_0:1.0 blinker_v1_0_0 ]
 
