@@ -354,14 +354,13 @@ diff -rupN old/linux-4.14/drivers/usb/phy/phy-ulpi.c linux-4.14/drivers/usb/phy/
 +
 +MODULE_DESCRIPTION("ULPI PHY driver");
 +MODULE_LICENSE("GPL v2");
-diff -rupN old/linux-4.14/include/linux/usb/chipidea.h linux-4.14/include/linux/usb/chipidea.h
---- old/linux-4.14/include/linux/usb/chipidea.h
-+++ linux-4.14/include/linux/usb/chipidea.h
-@@ -60,6 +60,7 @@ struct ci_hdrc_platform_data {
- #define CI_HDRC_OVERRIDE_RX_BURST	BIT(11)
- #define CI_HDRC_OVERRIDE_PHY_CONTROL	BIT(12) /* Glue layer manages phy */
- #define CI_HDRC_REQUIRES_ALIGNED_DMA	BIT(13)
-+#define CI_HDRC_PHY_VBUS_CONTROL	BIT(14)
- 	enum usb_dr_mode	dr_mode;
- #define CI_HDRC_CONTROLLER_RESET_EVENT		0
- #define CI_HDRC_CONTROLLER_STOPPED_EVENT	1
+--- linux-4.14-orig/drivers/net/wireless/realtek/rtl8188eu/os_dep/ioctl_cfg80211.c	2019-10-07 11:00:13.336166963 +0200
++++ linux-4.14/drivers/net/wireless/realtek/rtl8188eu/os_dep/ioctl_cfg80211.c	2019-10-07 11:22:14.294877883 +0200
+@@ -2948,7 +2948,6 @@ void rtw_cfg80211_indicate_sta_assoc(str
+ 		sinfo.filled = 0;
+ 		sinfo.assoc_req_ies = pmgmt_frame + WLAN_HDR_A3_LEN + ie_offset;
+ 		sinfo.assoc_req_ies_len = frame_len - WLAN_HDR_A3_LEN - ie_offset;
+-		cfg80211_sinfo_alloc_tid_stats(&sinfo, GFP_KERNEL);
+ 		cfg80211_new_sta(ndev, GetAddr2Ptr(pmgmt_frame), &sinfo, GFP_ATOMIC);
+ 	}
+ }
