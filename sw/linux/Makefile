@@ -16,8 +16,8 @@ PART = xc7z020clg484-1
 PROC = ps7_cortexa9_0
 
 # Files from hlx
-BIT   = ../../fpga/hlx/build/projects/pitaya-min.runs/impl_1/system_wrapper.bit
-HWDEF = ../../fpga/hlx/build/projects/pitaya-min.sdk/system_wrapper.hdf
+BIT   = ../../fpga/hlx/build/pitaya-min.bit
+HWDEF = ../../fpga/hlx/build/pitaya-min.sdk/system_wrapper.hdf
 
 # uEnv source
 UENV_SRC = source/uEnv.txt
@@ -207,12 +207,10 @@ $(DTB): $(UIMAGE) build/$(NAME).tree/system-top.dts
 ################################################################################
 # Errors if HLx design not completed
 $(HWDEF):
-	@echo Hardware definition not found
-	@echo Go to fpga/hlx directory and export hardware definition
+	$(error Hardware definition not found. Go to fpga/hlx directory and export hardware definition)
 
 $(BIT):
-	@echo Bitstream not found
-	@echo Go to fpga/hlx directory and build
+	$(error Bitstream not found. Go to fpga/hlx directory and build)
 
 ################################################################################
 # Create first stage bootloader using Hardware Software Interface (HSI)
