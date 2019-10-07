@@ -27,9 +27,10 @@ module blinker_top
   reg [32:0] counter;
 
   // Assign values
-  assign led[0] = 1'b1;
+  // assign led[0] = 1'b1;
+  assign led = 8'b0101_0101;
 
-  assign led[7:1] = counter[31:25];
+  // assign led[7:1] = counter[8:2];
 
   // Counter
   always @ (posedge aclk) begin
