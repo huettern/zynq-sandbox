@@ -14,6 +14,11 @@ set project_location [lindex $argv 1]
 
 open_project $project_location/$project_name.xpr
 
+# Update IP catalog and upgrade all IPs
+update_ip_catalog -rebuild -scan_changes
+upgrade_ip [get_ips]
+
+
 puts [get_property PROGRESS [get_runs synth_1]]
 puts [get_property PROGRESS [get_runs impl_1]]
 
