@@ -20,6 +20,24 @@ set ip_location [lindex $argv 2]
 # Get project specific settings
 source projects/$project_name/project_config.tcl
 
+# Check for vivado min version
+regexp {v(\d+).(\d)} [version] full_match is_maj_ver is_min_ver
+regexp {(\d+).(\d)} $vivado_version full_match req_maj_ver req_min_ver
+
+if {$req_maj_ver > $is_maj_ver} {
+  puts [format "ERROR: Major version mismatch. Project settings requested %s.%s but is %s.%s" $req_maj_ver $req_min_ver $is_maj_ver $is_min_ver]
+  return
+} elseif {$req_maj_ver == $is_maj_ver} {
+  if {$req_min_ver > $is_min_ver} {
+    puts [format "ERROR: Minor version mismatch. Project settings requested %s.%s but is %s.%s" $req_maj_ver $req_min_ver $is_maj_ver $is_min_ver]
+    return
+  } else {
+      puts "Version chek complete"
+  }
+} else {
+    puts "Version chek complete"
+}
+
 # Cleanup
 file delete -force $build_location/$project_name.cache $build_location/$project_name.hw $build_location/$project_name.srcs $build_location/$project_name.runs $build_location/$project_name.xpr
 
