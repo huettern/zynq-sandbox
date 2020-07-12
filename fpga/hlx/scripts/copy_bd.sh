@@ -55,6 +55,10 @@ echo "Target: $bd"
 echo "# Copied form Vivado block design export" > $bd
 cat $sc | tail -n -$((lines-start)) | head -n $((end-start)) >> $bd
 
+# remove ports
+# sed -i '/create_bd_intf_port/d' $bd
+# sed -i '/create_bd_port/d' $bd
+
 # Done
 echo "Done. Deleting Backup."
 rm $bd.bak

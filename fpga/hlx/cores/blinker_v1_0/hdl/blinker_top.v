@@ -2,7 +2,7 @@
 // Design Name : blinker_top
 // File Name   : blinker_top.v
 // Function    : Simple LED blinked
-// Coder       : Deepak
+// Coder       : Noah
 //-----------------------------------------------------
 
 module blinker_top
@@ -27,10 +27,10 @@ module blinker_top
   reg [32:0] counter;
 
   // Assign values
-  // assign led[0] = 1'b1;
-  assign led = 8'b0101_0101;
+  assign led[0] = 1'b1;
+  // assign led = 8'b0101_0101;
 
-  // assign led[7:1] = counter[8:2];
+  assign led[7:1] = counter[28:22];
 
   // Counter
   always @ (posedge aclk) begin

@@ -7,28 +7,33 @@
 # 		Run ghdl simulation
 
 # Project name
-NAME = pitaya-min
+NAME = base
 
 ################################################################################
 # Build directory
 BUILD = build
 
 # Cores to build in the ./cores directory
-CORES = impulse_generator_v1_0 blinker_v1_0 
+CORES = blinker_v1_0 \
+				axis_red_pitaya_adc_v3_0 \
+				axis_red_pitaya_dac_v2_0 \
+				axis_decimator_v1_0 \
+				axis_bram_writer_v1_0 \
+				axis_sample_hold_v1_0
 
 # Command line tools
 VIVADO = vivado -log build/log.log -journal build/journal.log -mode batch
 RM = rm -rf
 
 # FPGA Part number
-PART ?= xc7z020clg484-1
+PART ?= xc7z010clg400-1
 include projects/$(NAME)/Makefile.make
 
 ################################################################################
 # if make is killed or interrupted during the execution of their recipes, 
 # the target is not deleted
 .PRECIOUS: $(BUILD)/cores/% $(BUILD)/%.xpr $(BUILD)/%.bit
-.PHONY: all bit cores clean-cores project clean-project flash sim clean-sim clean impl flashqspi hw-export
+.PHONY: all bit cores clean-cores project clean-project flash sim clean-sim clean impl flashqspi hw-export clean-impl clean-synth
 
 all: bit
 
@@ -39,9 +44,13 @@ bit: $(BUILD)/$(NAME).bit
 
 # Synth and Impl only
 impl: $(BUILD)/projects/$(NAME).runs/impl_1
+clean-impl: 
+	rm -rf $(BUILD)/projects/$(NAME).runs/impl*
 
 # Synth only
 synth: $(BUILD)/projects/$(NAME).runs/synth_1
+clean-synth: 
+	rm -rf $(BUILD)/projects/$(NAME).runs/synth*
 
 # HW def
 hw-export: $(BUILD)/$(NAME).sdk/system_wrapper.hdf
@@ -50,7 +59,7 @@ hw-export: $(BUILD)/$(NAME).sdk/system_wrapper.hdf
 # Project
 # Depends on project sources and cores
 #
-project: $(addprefix $(BUILD)/cores/, $(CORES)) $(addprefix $(BUILD)/projects/, $(NAME).xpr) hw-export
+project: $(addprefix $(BUILD)/cores/, $(CORES)) $(addprefix $(BUILD)/projects/, $(NAME).xpr)
 
 clean-project:
 	$(RM) $(BUILD)/projects/$(NAME)*

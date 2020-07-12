@@ -47,12 +47,14 @@ create_project -part $part_name $project_name $build_location -force
 # Link to IPs
 set_property IP_REPO_PATHS "$ip_location/" [current_project]
 set curr_path [get_property  ip_repo_paths [current_project]]
+# add hls core location
+set curr_path "$curr_path/ ../hls/build/ip"
 set_property ip_repo_paths "$curr_path/" [current_project]
 update_ip_catalog
 
 # Project settings
 set obj [current_project]
-set_property -name "target_language" -value "VHDL" -objects $obj
+set_property target_language Verilog [current_project]
 
 # This is a fix for a bug in 2017.3 when using evaluation license
 # See https://forums.xilinx.com/t5/Synthesis/cannot-open-xdc-file/td-p/811689 for more informatin
@@ -147,7 +149,7 @@ generate_target all [get_files $bd_path/system.bd]
 make_wrapper -files [get_files $bd_path/system.bd] -top
 
 # add system wrapper source
-add_files -norecurse $bd_path/hdl/system_wrapper.vhd
+add_files -norecurse $bd_path/hdl/system_wrapper.v
 
 # Add user vhd files
 set files [glob -nocomplain projects/$project_name/hdl/*.vhd]
