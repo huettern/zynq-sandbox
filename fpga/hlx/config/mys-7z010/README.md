@@ -33,12 +33,12 @@ Mfc. part number: MYS-7Z010-C-S
 Part: 2x MT41K256M16TW-107
 Target timing:  tRCD-tRP-CL
 
-> **TABLE DEPERCATED**
+Use DDR3L-1600 K 11-11-11
 
 | Vivado Propoerty         | Datasheet Symbol | Value     |
 |:-------------------------|:-----------------|:----------|
-| Memory Type              |                  | DDR3      |
-| Memory Part              |                  | Custom    |
+| Memory Type              |                  | DDR3L Low Voltage      |
+| Memory Part              |                  | MT41K256M16TW-107    |
 | Effective DRAM Bus Width |                  | 32 Bit    |
 | Burst Length             |                  | 8 ?       |
 | DDR                      |                  | 533.333 ? |
@@ -49,11 +49,11 @@ Target timing:  tRCD-tRP-CL
 | Row Address Count        |                  | 15        |
 | Col Address Count        |                  | 10        |
 | CAS Laatency             | CL               | 11        |
-| CAS Write Latency        | CWL              | 8         |
+| CAS Write Latency        | CWL              | Supported: 5,6,7,8 Use 8         |
 | RAS to CAS Delay         | tRCD             | 11        |
 | Precharge Time           | tRP              | 11        |
 | tRC                      | tRC              | >48.75ns  |
 | tRASmin                  | tRAS             | >35ns     |
-| tFAW                     | tFAW             | 32        |
+| tFAW                     | tFAW             | >40ns        |
 
 

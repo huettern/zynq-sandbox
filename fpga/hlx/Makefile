@@ -6,8 +6,11 @@
 # 	make TOP=top_tb sim
 # 		Run ghdl simulation
 
+# Board config name
+BOARD = mys-7z010
+
 # Project name
-NAME = base
+NAME = zturn-base
 
 ################################################################################
 # Build directory
@@ -25,8 +28,10 @@ CORES = blinker_v1_0 \
 VIVADO = vivado -log build/log.log -journal build/journal.log -mode batch
 RM = rm -rf
 
-# FPGA Part number
-PART ?= xc7z010clg400-1
+# include board makefile
+include config/$(BOARD)/Makefile.make
+
+# include project makefile
 include projects/$(NAME)/Makefile.make
 
 ################################################################################
