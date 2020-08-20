@@ -9,8 +9,8 @@ LD_LIBRARY_PATH =
 
 ################################################################################
 # Project name
-NAME = base
-HLX_NAME = base
+NAME = zturn-base
+HLX_NAME = zturn-base
 
 PART = xc7z010clg400-1
 
@@ -115,6 +115,16 @@ uenv: $(UENV)
 
 bootbin: build/boot.bin
 busybox: $(BUSYBOX)
+
+help:
+	@echo "Build step-by step:"
+	@echo "  make xsa"
+	@echo "  make fsbl"
+	@echo "  make dts"
+	@echo "  make uimage"
+	@echo "  make uboot"
+	@echo "  make dtb"
+	@echo "  make bootbin"
 
 ################################################################################
 # Includes
