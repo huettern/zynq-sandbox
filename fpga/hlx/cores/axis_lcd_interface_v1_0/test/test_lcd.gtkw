@@ -1,0 +1,38 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Mon Aug 24 13:16:36 2020
+[*]
+[dumpfile] "/home/noah/git/zynq-sandbox/fpga/hlx/cores/axis_lcd_interface_v1_0/test/dump.vcd"
+[dumpfile_mtime] "Mon Aug 24 13:16:20 2020"
+[dumpfile_size] 19233550
+[savefile] "/home/noah/git/zynq-sandbox/fpga/hlx/cores/axis_lcd_interface_v1_0/test/test_lcd.gtkw"
+[timestart] 0
+[size] 1720 1121
+[pos] -1 -1
+*-17.715431 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[sst_width] 306
+[signals_width] 168
+[sst_expanded] 1
+[sst_vpaned_height] 325
+@28
+top.clk_i
+top.rst_ni
+@200
+-
+@28
+top.start_i
+top.busy_o
+@200
+-
+-LCD
+@28
+top.hsync_o
+top.vsync_o
+top.enable_o
+@200
+-
+-Pixel data
+@29
+top.active_video_o
+[pattern_trace] 1
+[pattern_trace] 0

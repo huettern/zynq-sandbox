@@ -1,0 +1,67 @@
+[*]
+[*] GTKWave Analyzer v3.3.86 (w)1999-2017 BSI
+[*] Mon Aug 24 13:53:29 2020
+[*]
+[dumpfile] "/home/noah/git/zynq-sandbox/fpga/hlx/cores/axis_lcd_interface_v1_0/test/dump.vcd"
+[dumpfile_mtime] "Mon Aug 24 13:42:01 2020"
+[dumpfile_size] 20134483
+[savefile] "/home/noah/git/zynq-sandbox/fpga/hlx/cores/axis_lcd_interface_v1_0/test/test_fifo.gtkw"
+[timestart] 0
+[size] 1720 1121
+[pos] -1 -1
+*-15.895123 110001 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[sst_width] 370
+[signals_width] 307
+[sst_expanded] 1
+[sst_vpaned_height] 314
+@28
+top.lcd_fifo.aclk_i
+top.lcd_fifo.rst_ni
+@200
+-
+-AXIS
+@24
+top.lcd_fifo.s_axis_tdata[17:0]
+@28
+top.lcd_fifo.s_axis_tready
+top.lcd_fifo.s_axis_tvalid
+top.lcd_fifo.s_axis_tlast
+top.lcd_fifo.s_axis_tuser[0]
+@200
+-
+-LCD
+@28
+top.lcd_fifo.active_video_i
+@25
+top.lcd_fifo.lcd_dat_o[17:0]
+@200
+-
+-Internals
+@28
+top.lcd_fifo.empty
+top.lcd_fifo.full
+top.lcd_fifo.underrun
+top.lcd_fifo.overrun
+@200
+-
+@28
+top.lcd_fifo.read_en
+@22
+top.lcd_fifo.rdaddr[6:0]
+@24
+top.lcd_fifo.o_item[17:0]
+@200
+-
+@28
+top.lcd_fifo.write_en
+@22
+top.lcd_fifo.wraddr[6:0]
+@24
+top.lcd_fifo.i_item[17:0]
+@200
+-
+@24
+top.lcd_fifo.fill[6:0]
+[pattern_trace] 1
+[pattern_trace] 0

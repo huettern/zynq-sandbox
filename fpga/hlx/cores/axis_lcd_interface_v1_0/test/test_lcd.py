@@ -23,7 +23,7 @@ from cocotb.result import TestFailure
 # TESTBENCH
 # ---------------------------------------------------------------------------------
 
-class TimingGenTB(object):
+class LcdTB(object):
 
     def __init__(self, dut, debug=False):
         self.dut = dut
@@ -37,56 +37,30 @@ class TimingGenTB(object):
         self.dut._log.debug("Resetting DUT")
         self.dut.rst_ni <= 0
         await Timer(duration, units='ns')
-        await RisingEdge(self.dut.clk_i)
+        await RisingEdge(self.dut.aclk_i)
         self.dut.rst_ni <= 1
         self.dut._log.debug("Out of reset")
 
     async def run(self, duration=20):
-        # Start pulse counter
-        cocotb.fork(pulse_assert("hsync", self.dut.clk_i, self.dut.hsync_o, active=0))
-        cocotb.fork(pulse_assert("vsync", self.dut.clk_i, self.dut.vsync_o, active=0))
-        cocotb.fork(pulse_assert("enable", self.dut.clk_i, self.dut.enable_o, active=1))
 
         # start
         await Timer(10, units='ns')
-        await RisingEdge(self.dut.clk_i)
+        await RisingEdge(self.dut.aclk_i)
 
-        self.dut.start_i <= 1
-        await RisingEdge(self.dut.clk_i)
-        self.dut.start_i <= 0
+        # Put some data in
+        self.dut.s_axis_tuser <= 1
+        for i in range(4*8):
+            self.dut.s_axis_tdata <= 10+i
+            self.dut.s_axis_tvalid <= 1
+            await RisingEdge(self.dut.aclk_i)
+            self.dut.s_axis_tuser <= 0
+        self.dut.s_axis_tvalid <= 0
 
         await Timer(2000, units='ns')
-        await RisingEdge(self.dut.clk_i)
+        await RisingEdge(self.dut.aclk_i)
 
         await Timer(duration, units='ns')
-        await RisingEdge(self.dut.clk_i)
-
-
-# ---------------------------------------------------------------------------------
-# Timing tester
-# ---------------------------------------------------------------------------------
-@cocotb.coroutine
-def pulse_assert(name, clk, signal, active=1, len=-1, count=-1):
-    state = 0
-    clk_cnt, pulse_cnt = 0, 0
-    if signal == active:
-        state = 1
-
-    while True:
-        yield RisingEdge(clk)
-        clk_cnt += 1
-        # print("%3d, %d %s" % (clk_cnt, state, signal) )
-
-        # check for rise
-        if state == 0 and (signal==active):
-            state = 1
-            clk_cnt = 0
-        # check for fall
-        if state == 1 and not (signal==active):
-            state = 0
-            pulse_cnt += 1
-            print("%s : Pulse complete. Duration: %d Count: %d" % (name, clk_cnt, pulse_cnt) )
-
+        await RisingEdge(self.dut.aclk_i)
 
 
 
@@ -96,8 +70,8 @@ def pulse_assert(name, clk, signal, active=1, len=-1, count=-1):
 
 async def run_test(dut):
     # create clock gen and TB
-    cocotb.fork(Clock(dut.clk_i, 10, units='ns').start())
-    tb = TimingGenTB(dut)
+    cocotb.fork(Clock(dut.aclk_i, 10, units='ns').start())
+    tb = LcdTB(dut)
 
     # reset
     await tb.reset()
