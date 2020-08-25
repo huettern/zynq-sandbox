@@ -53,9 +53,19 @@ class TpgTB(object):
         # Put some data in
         self.dut.trigger_i <= 1
         await RisingEdge(self.dut.aclk_i)
-        # self.dut.trigger_i <= 0
+        self.dut.trigger_i <= 0
 
-        await Timer(400, units='ns')
+        # put some random backpressure on tready
+        random.seed(10)
+        while self.dut.m_axis_tuser != 1:
+            if random.random() > 0.6:
+                self.dut.m_axis_tready <= 0
+            else:
+                self.dut.m_axis_tready <= 1
+            await RisingEdge(self.dut.aclk_i)
+
+
+        await Timer(100, units='ns')
         await RisingEdge(self.dut.aclk_i)
 
         # Put some data in
@@ -63,8 +73,29 @@ class TpgTB(object):
         await RisingEdge(self.dut.aclk_i)
         self.dut.trigger_i <= 0
 
-        while self.dut.m_axis_tuser != 1:
-            await RisingEdge(self.dut.aclk_i)
+        # put backpressure on last/user
+        self.dut.m_axis_tready <= 1
+        do_run = 1
+        while do_run:
+            if self.dut.m_axis_tlast == 1:
+                self.dut.m_axis_tready <= 0
+                await RisingEdge(self.dut.aclk_i)
+                await RisingEdge(self.dut.aclk_i)
+                self.dut.m_axis_tready <= 1
+                await RisingEdge(self.dut.aclk_i)
+
+            if self.dut.m_axis_tuser == 1:
+                self.dut.m_axis_tready <= 0
+                await RisingEdge(self.dut.aclk_i)
+                await RisingEdge(self.dut.aclk_i)
+                await RisingEdge(self.dut.aclk_i)
+                await RisingEdge(self.dut.aclk_i)
+                self.dut.m_axis_tready <= 1
+                await RisingEdge(self.dut.aclk_i)
+                do_run = 0
+
+            # await RisingEdge(self.dut.aclk_i)
+            await Timer(1, units='ns')
 
         await Timer(50, units='ns')
         await RisingEdge(self.dut.aclk_i)

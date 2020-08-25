@@ -1,7 +1,7 @@
 module axisv_tpg #(
   // active pixels on display
-  parameter H_PIXEL_COUNT = 4,
-  parameter V_PIXEL_COUNT = 20,
+  parameter H_PIXEL_COUNT = 8,
+  parameter V_PIXEL_COUNT = 4,
 
   // LCD data width
   parameter DATA_WIDTH = 18
@@ -43,6 +43,10 @@ module axisv_tpg #(
   assign m_axis_tdata[ROW_CNT_WIDTH:0] = row_cnt_q;
   assign m_axis_tdata[DATA_WIDTH-1:ROW_CNT_WIDTH+1] = 0;
 
+  // axis stream valid
+  logic stream_on;
+  assign stream_on = m_axis_tvalid && m_axis_tready;
+
   always_comb begin
     running_d = running_q;
     col_cnt_d = col_cnt_q;
@@ -56,7 +60,7 @@ module axisv_tpg #(
     end
 
     // increment logic
-    if (running_q) begin
+    if (running_q && stream_on) begin
       col_cnt_d = col_cnt_q + 1;
 
       // at last pixel of line
