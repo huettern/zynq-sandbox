@@ -48,8 +48,8 @@ class FiFoTB(object):
         await RisingEdge(self.dut.aclk_i)
 
         # Put some data in
-        for i in range(4):
-            self.dut.s_axis_tdata <= 10+i
+        for i in range(130):
+            self.dut.s_axis_tdata <= i
             self.dut.s_axis_tvalid <= 1
             await RisingEdge(self.dut.aclk_i)
         self.dut.s_axis_tvalid <= 0

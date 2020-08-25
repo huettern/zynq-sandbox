@@ -1,7 +1,7 @@
 module axisv_tpg #(
   // active pixels on display
-  parameter H_PIXEL_COUNT = 8,
-  parameter V_PIXEL_COUNT = 4,
+  parameter H_PIXEL_COUNT = 800,
+  parameter V_PIXEL_COUNT = 480,
 
   // LCD data width
   parameter DATA_WIDTH = 18
@@ -21,7 +21,8 @@ module axisv_tpg #(
 
   // ------------------------------
   // user input
-  input logic trigger_i
+  input logic trigger_i,
+  output logic active_o
 );
   
   localparam COL_CNT_WIDTH = $clog2(H_PIXEL_COUNT);
@@ -33,15 +34,23 @@ module axisv_tpg #(
 
   // EOL on tlast
   assign m_axis_tlast = (col_cnt_q == (H_PIXEL_COUNT-1));
-  // EOF on tuser[0]
-  assign m_axis_tuser[0] = ( (row_cnt_q == (V_PIXEL_COUNT-1)) && (col_cnt_q == (H_PIXEL_COUNT-1)) );
+  // SOF on tuser[0]
+  assign m_axis_tuser[0] = ( running_q && (row_cnt_q == 0) && (col_cnt_q == 0));
   // running on valid
   assign m_axis_tvalid = running_q;
+  // copy of running on active pin
+  assign active_o = running_q;
 
   // constant data value
   // assign m_axis_tdata = 18'b000000_000000_111111;
-  assign m_axis_tdata[ROW_CNT_WIDTH:0] = row_cnt_q;
-  assign m_axis_tdata[DATA_WIDTH-1:ROW_CNT_WIDTH+1] = 0;
+  logic [5:0] active_color;
+  assign active_color = row_cnt_q[5:0];
+  logic [2:0] color_select;
+  assign color_select = col_cnt_q[8:6];
+
+  assign m_axis_tdata[ 5: 0] = color_select[0] ? active_color : 6'b0;
+  assign m_axis_tdata[11: 6] = color_select[1] ? active_color : 6'b0;
+  assign m_axis_tdata[17:12] = color_select[2] ? active_color : 6'b0;
 
   // axis stream valid
   logic stream_on;

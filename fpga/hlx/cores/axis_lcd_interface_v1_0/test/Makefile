@@ -13,17 +13,17 @@ export PYTHONPATH := $(PWD)/../cosim:$(PYTHONPATH)
 # for timing generator
 ########################################
 
-VERILOG_SOURCES  =  $(PWD)/../hdl/lcd_timing_generator.sv
-TOPLEVEL = lcd_timing_generator
-MODULE := test_timing_gen
+# VERILOG_SOURCES  =  $(PWD)/../hdl/lcd_timing_generator.sv
+# TOPLEVEL = lcd_timing_generator
+# MODULE := test_timing_gen
 
 ########################################
 # for fifo
 ########################################
 
-# VERILOG_SOURCES  =  $(PWD)/../hdl/lcd_fifo.sv
-# TOPLEVEL = lcd_fifo
-# MODULE := test_fifo
+VERILOG_SOURCES  =  $(PWD)/../hdl/lcd_fifo.sv
+TOPLEVEL = lcd_fifo
+MODULE := test_fifo
 
 ########################################
 # for top

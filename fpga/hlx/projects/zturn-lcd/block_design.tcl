@@ -14,12 +14,12 @@
   set enable_o_0 [ create_bd_port -dir O enable_o_0 ]
   set lcd_clk [ create_bd_port -dir O lcd_clk ]
   set lcd_dat_o_0 [ create_bd_port -dir O -from 17 -to 0 lcd_dat_o_0 ]
-  set rgb_led_o [ create_bd_port -dir O -from 2 -to 0 rgb_led_o ]
+  set rgb_led_o [ create_bd_port -dir O -from 0 -to 0 rgb_led_o ]
 
   # Create instance: axis_lcd_interface_v_0, and set properties
   set axis_lcd_interface_v_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:axis_lcd_interface_v1_0:1.0 axis_lcd_interface_v_0 ]
   set_property -dict [ list \
-   CONFIG.FIFO_DEPTH {4096} \
+   CONFIG.FIFO_DEPTH {128} \
    CONFIG.H_PIXEL_COUNT {800} \
    CONFIG.THB_COUNT {88} \
    CONFIG.THF_COUNT {40} \
@@ -32,10 +32,6 @@
 
   # Create instance: axisv_tpg_v1_0_0, and set properties
   set axisv_tpg_v1_0_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:axisv_tpg_v1_0:1.0 axisv_tpg_v1_0_0 ]
-  set_property -dict [ list \
-   CONFIG.H_PIXEL_COUNT {800} \
-   CONFIG.V_PIXEL_COUNT {480} \
- ] $axisv_tpg_v1_0_0
 
   # Create instance: blinker_v1_0_0, and set properties
   set blinker_v1_0_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:blinker_v1_0:1.0 blinker_v1_0_0 ]
@@ -446,6 +442,8 @@
   # Create instance: system_ila_0, and set properties
   set system_ila_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:system_ila:1.1 system_ila_0 ]
   set_property -dict [ list \
+   CONFIG.C_BRAM_CNT {1.5} \
+   CONFIG.C_DATA_DEPTH {2048} \
    CONFIG.C_MON_TYPE {MIX} \
    CONFIG.C_NUM_MONITOR_SLOTS {1} \
    CONFIG.C_NUM_OF_PROBES {4} \
@@ -465,8 +463,8 @@
   # Create instance: xlslice_0, and set properties
   set xlslice_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 xlslice_0 ]
   set_property -dict [ list \
-   CONFIG.DIN_FROM {3} \
-   CONFIG.DIN_TO {3} \
+   CONFIG.DIN_FROM {6} \
+   CONFIG.DIN_TO {6} \
    CONFIG.DIN_WIDTH {8} \
    CONFIG.DOUT_WIDTH {1} \
  ] $xlslice_0
@@ -491,7 +489,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets axisv_tpg_v1_0_0_M_AXIS] [get_bd
   connect_bd_net -net rst_system_33M_peripheral_reset [get_bd_pins impulse_generator_v1_0/rst] [get_bd_pins rst_system_33M/peripheral_reset]
   connect_bd_net -net xlslice_0_Dout [get_bd_pins axisv_tpg_v1_0_0/trigger_i] [get_bd_pins impulse_generator_v1_0/impulse] [get_bd_pins system_ila_0/probe2]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets xlslice_0_Dout]
-  connect_bd_net -net xlslice_0_Dout1 [get_bd_pins impulse_generator_v1_0/enable] [get_bd_pins xlslice_0/Dout]
+  connect_bd_net -net xlslice_0_Dout1 [get_bd_ports rgb_led_o] [get_bd_pins impulse_generator_v1_0/enable] [get_bd_pins xlslice_0/Dout]
 
   # Create address segments
 

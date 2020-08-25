@@ -57,7 +57,8 @@ class TpgTB(object):
 
         # put some random backpressure on tready
         random.seed(10)
-        while self.dut.m_axis_tuser != 1:
+        await RisingEdge(self.dut.m_axis_tvalid)
+        while self.dut.m_axis_tvalid == 1:
             if random.random() > 0.6:
                 self.dut.m_axis_tready <= 0
             else:
@@ -72,17 +73,20 @@ class TpgTB(object):
         self.dut.trigger_i <= 1
         await RisingEdge(self.dut.aclk_i)
         self.dut.trigger_i <= 0
+        while self.dut.m_axis_tvalid == 0:
+            print('here')
+            await RisingEdge(self.dut.aclk_i)
 
         # put backpressure on last/user
-        self.dut.m_axis_tready <= 1
         do_run = 1
-        while do_run:
+        while self.dut.m_axis_tvalid == 1:
             if self.dut.m_axis_tlast == 1:
                 self.dut.m_axis_tready <= 0
                 await RisingEdge(self.dut.aclk_i)
                 await RisingEdge(self.dut.aclk_i)
                 self.dut.m_axis_tready <= 1
                 await RisingEdge(self.dut.aclk_i)
+                do_run = 0
 
             if self.dut.m_axis_tuser == 1:
                 self.dut.m_axis_tready <= 0
@@ -92,7 +96,6 @@ class TpgTB(object):
                 await RisingEdge(self.dut.aclk_i)
                 self.dut.m_axis_tready <= 1
                 await RisingEdge(self.dut.aclk_i)
-                do_run = 0
 
             # await RisingEdge(self.dut.aclk_i)
             await Timer(1, units='ns')
