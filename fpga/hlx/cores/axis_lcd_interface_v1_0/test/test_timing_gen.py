@@ -55,7 +55,12 @@ class TimingGenTB(object):
         await RisingEdge(self.dut.clk_i)
         self.dut.start_i <= 0
 
-        await Timer(2000, units='ns')
+
+        await Timer(200, units='ns')
+        while self.dut.busy_o == 1:
+            await RisingEdge(self.dut.clk_i)
+        
+        await Timer(200, units='ns')
         await RisingEdge(self.dut.clk_i)
 
         await Timer(duration, units='ns')

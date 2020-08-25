@@ -28,7 +28,7 @@ module lcd_fifo #(
 
   // ----------------------------------------------------------------------
   // Defines
-  parameter ADDR_WIDTH = $clog2(DEPTH);
+  localparam ADDR_WIDTH = $clog2(DEPTH);
 
   // ----------------------------------------------------------------------
   // Signals and wires

@@ -43,6 +43,7 @@ create_project -part $part_name $project_name $build_location -force
 # Add all files the core needs
 set vhdl_files [glob -nocomplain cores/$core_name/hdl/*.vhd]
 set verilog_files [glob -nocomplain cores/$core_name/hdl/*.v]
+set sverilog_files [glob -nocomplain cores/$core_name/hdl/*.sv]
 set bench_files [glob -nocomplain cores/$core_name/bench/*.vhd]
 set constr_files [glob -nocomplain cores/$core_name/*.xdc]
 foreach file $vhdl_files {
@@ -51,6 +52,11 @@ foreach file $vhdl_files {
     }
 }
 foreach file $verilog_files {
+    if {[file exists $file]} {
+        add_files -fileset sources_1 -norecurse $file
+    }
+}
+foreach file $sverilog_files {
     if {[file exists $file]} {
         add_files -fileset sources_1 -norecurse $file
     }

@@ -1,23 +1,23 @@
 module lcd_timing_generator #(
     // active pixels on display
-    parameter H_PIXEL_COUNT = 8,
-    parameter V_PIXEL_COUNT = 4,
+    parameter H_PIXEL_COUNT = 800,
+    parameter V_PIXEL_COUNT = 480,
 
     // horizontal back and front porch, multiple of clk_i
     // thp: hsync pulse width
     // thb: horizontal invalid period BEFORE active area
     // thf: horizontal invalid period AFTER active area
-    parameter THP_COUNT = 2,
-    parameter THB_COUNT = 3,
-    parameter THF_COUNT = 4,
+    parameter THP_COUNT = 128,
+    parameter THB_COUNT = 88,
+    parameter THF_COUNT = 40,
 
     // vertical back and front porch, multiple of hsync_o
     // thp: hsync pulse width
     // thb: horizontal invalid period BEFORE active area
     // thf: horizontal invalid period AFTER active area
-    parameter TVP_COUNT = 5,
-    parameter TVB_COUNT = 6,
-    parameter TVF_COUNT = 7
+    parameter TVP_COUNT = 2112,
+    parameter TVB_COUNT = 33792,
+    parameter TVF_COUNT = 11616
   ) (
   // ------------------------------
   // clock and reset
@@ -40,6 +40,8 @@ module lcd_timing_generator #(
 
   // ----------------------------------------------------------------------
   // Defines
+  localparam HCNT_BITS = $clog2(THP_COUNT+THB_COUNT+THF_COUNT+H_PIXEL_COUNT);
+  localparam VCNT_BITS = $clog2(TVP_COUNT+TVB_COUNT+TVF_COUNT+V_PIXEL_COUNT);
 
   // ----------------------------------------------------------------------
   // Signals and wires
@@ -47,7 +49,8 @@ module lcd_timing_generator #(
   // horizontal and vertical states
   logic running_d, running_q, vertical_running, lines_done;
 
-  logic [9:0] hcnt_d, hcnt_q, vcnt_d, vcnt_q;
+  logic [HCNT_BITS-1:0] hcnt_d, hcnt_q;
+  logic [VCNT_BITS-1:0] vcnt_d, vcnt_q;
 
   logic hline_last, vline_last;
   assign hline_last = (hcnt_q == (THP_COUNT+THB_COUNT+THF_COUNT+H_PIXEL_COUNT-1));

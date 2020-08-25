@@ -42,6 +42,9 @@ class TpgTB(object):
         self.dut._log.debug("Out of reset")
 
     async def run(self, duration=20):
+        # Start pulse counter
+        cocotb.fork(pulse_assert("tlast", self.dut.aclk_i, self.dut.m_axis_tlast, active=1))
+        cocotb.fork(pulse_assert("tuser", self.dut.aclk_i, self.dut.m_axis_tuser, active=1))
 
         # start
         await Timer(10, units='ns')
@@ -50,7 +53,7 @@ class TpgTB(object):
         # Put some data in
         self.dut.trigger_i <= 1
         await RisingEdge(self.dut.aclk_i)
-        self.dut.trigger_i <= 0
+        # self.dut.trigger_i <= 0
 
         await Timer(400, units='ns')
         await RisingEdge(self.dut.aclk_i)
@@ -60,10 +63,37 @@ class TpgTB(object):
         await RisingEdge(self.dut.aclk_i)
         self.dut.trigger_i <= 0
 
+        while self.dut.m_axis_tuser != 1:
+            await RisingEdge(self.dut.aclk_i)
 
-        await Timer(400, units='ns')
+        await Timer(50, units='ns')
         await RisingEdge(self.dut.aclk_i)
-        
+
+# ---------------------------------------------------------------------------------
+# Timing tester
+# ---------------------------------------------------------------------------------
+@cocotb.coroutine
+def pulse_assert(name, clk, signal, active=1, len=-1, count=-1):
+    state = 0
+    clk_cnt, pulse_cnt = 0, 0
+    if signal == active:
+        state = 1
+
+    while True:
+        yield RisingEdge(clk)
+        clk_cnt += 1
+        # print("%3d, %d %s" % (clk_cnt, state, signal) )
+
+        # check for rise
+        if state == 0 and (signal==active):
+            state = 1
+            clk_cnt = 0
+        # check for fall
+        if state == 1 and not (signal==active):
+            state = 0
+            pulse_cnt += 1
+            print("%s : Pulse complete. Duration: %d Count: %d" % (name, clk_cnt, pulse_cnt) )
+
 
 
 

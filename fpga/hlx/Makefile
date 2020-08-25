@@ -10,7 +10,7 @@
 BOARD = mys-7z010
 
 # Project name
-NAME = zturn-base
+NAME = zturn-lcd
 
 ################################################################################
 # Build directory
@@ -22,7 +22,10 @@ CORES = blinker_v1_0 \
 				axis_red_pitaya_dac_v2_0 \
 				axis_decimator_v1_0 \
 				axis_bram_writer_v1_0 \
-				axis_sample_hold_v1_0
+				axis_sample_hold_v1_0 \
+				axis_lcd_interface_v1_0 \
+				axisv_tpg_v1_0 \
+				impulse_generator_v1_0
 
 # Command line tools
 VIVADO = vivado -log build/log.log -journal build/journal.log -mode batch
