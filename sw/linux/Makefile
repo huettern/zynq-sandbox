@@ -9,8 +9,10 @@ LD_LIBRARY_PATH =
 
 ################################################################################
 # Project name
-NAME = zturn-base
-HLX_NAME = zturn-base
+NAME = zturn-lcd-vdma
+HLX_NAME = zturn-lcd-vdma
+
+BOARD = zturn-7z010
 
 PART = xc7z010clg400-1
 
@@ -164,10 +166,11 @@ $(BUSYBOX_TAR):
 $(UBOOT_DIR): $(UBOOT_TAR)
 	mkdir -p $@
 	tar -zxf $< --strip-components=1 --directory=$@
-	patch -d build -p 0 < patches/uboot/u-boot-xlnx-$(UBOOT_TAG).patch
+# 	patch -d build -p 0 < patches/uboot/u-boot-xlnx-$(UBOOT_TAG).patch
 	cp patches/uboot/zynq_red_pitaya_defconfig $@/configs
 	cp patches/uboot/zynq-red-pitaya.dts $@/arch/arm/dts
-	cp patches/uboot/u-boot-lantiq.c $@/drivers/net/phy/lantiq.c
+	cp patches/uboot/zynq_red_pitaya.h $@/include/configs
+# 	cp patches/uboot/u-boot-lantiq.c $@/drivers/net/phy/lantiq.c
 
 ################################################################################
 # Untar and patch Linux kernel
@@ -221,7 +224,8 @@ $(UBOOT): $(UBOOT_DIR)
 ################################################################################
 # Generate bootimage
 build/boot.bin: $(FSBL) $(BIT) $(UBOOT)
-	echo "img:{[bootloader] $(FSBL) $(BIT) [load=0x4000000,startup=0x4000000] $(UBOOT_DIR)/u-boot.bin}" > build/boot.bif
+# 	echo "img:{[bootloader] $(FSBL) $(BIT) [load=0x100000,startup=0x100000] $(UBOOT_DIR)/u-boot.bin}" > build/boot.bif
+	echo "img:{[bootloader] $(FSBL) $(BIT) [load=0x100000,startup=0x100000] $(UBOOT_DIR)/u-boot.bin}" > build/boot.bif
 	bootgen -image build/boot.bif -w -o i $@
 # 	echo "img:{[bootloader] $(FSBL) $(BIT) [load=0x4000000,startup=0x4000000] $(UBOOT)}" > build/boot.bif
 # 	echo "img:{[bootloader] $^}" > build/boot.bif
@@ -231,7 +235,9 @@ build/boot.bin: $(FSBL) $(BIT) $(UBOOT)
 # Compile devicetree
 $(DTB): $(UIMAGE) build/$(NAME).tree/system-top.dts
 	$(LINUX_DIR)/scripts/dtc/dtc -I dts -O dtb -o $(DTB) \
-		-i build/$(NAME).tree build/$(NAME).tree/system-top.dts
+		-i build/$(NAME).tree \
+		-i boards/$(BOARD)/dts \
+		build/$(NAME).tree/system-top.dts
 
 ################################################################################
 # Errors if HLx design not completed
@@ -264,7 +270,8 @@ build/%.tree/system-top.dts: $(XSA) $(DTREE_DIR)
 	# project_name proc_name xsa_path repo_path hard_path tree_path 
 	$(XSCT) scripts/devicetree.tcl $(NAME) $(PROC) $(XSA) $(DTREE_DIR) build/$(NAME).hard build/$(NAME).tree
 	sed -i 's|#include|/include/|' $@
-	patch -d build/$(NAME).tree -p 0 < patches/devicetree/devicetree.patch
+	sed -i '/^.*pcw.dtsi.*/a /include/ "boards/$(BOARD)/dts/board.dtsi"' build/zturn-base.tree/system-top.dts
+	test -f boards/$(BOARD)/dts/devicetree.patch && patch -d build/$(NAME).tree -p 0 || :
 
 ################################################################################
 # Generate uEnv.txt

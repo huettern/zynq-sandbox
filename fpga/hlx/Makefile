@@ -10,7 +10,7 @@
 BOARD = mys-7z010
 
 # Project name
-NAME = zturn-lcd
+NAME = zturn-lcd-vdma
 
 ################################################################################
 # Build directory

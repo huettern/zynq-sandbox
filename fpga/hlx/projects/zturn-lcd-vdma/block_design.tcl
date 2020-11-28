@@ -7,14 +7,29 @@
 
 
   # Create ports
-  # set beeper_o [ create_bd_port -dir O beeper_o ]
-  # set cape_n_io [ create_bd_port -dir IO -from 17 -to 0 cape_n_io ]
-  # set cape_p_io [ create_bd_port -dir IO -from 17 -to 0 cape_p_io ]
-  # set dip_sw_i [ create_bd_port -dir I -from 3 -to 0 dip_sw_i ]
-  # set enable_o_0 [ create_bd_port -dir O enable_o_0 ]
+  set beeper_o [ create_bd_port -dir O beeper_o ]
+  set cape_n_io [ create_bd_port -dir IO -from 17 -to 0 cape_n_io ]
+  set cape_p_io [ create_bd_port -dir IO -from 17 -to 0 cape_p_io ]
+  set dip_sw_i [ create_bd_port -dir I -from 3 -to 0 dip_sw_i ]
   set lcd_clk [ create_bd_port -dir O lcd_clk ]
   set lcd_dat_o_0 [ create_bd_port -dir O -from 17 -to 0 lcd_dat_o_0 ]
-  # set rgb_led_o [ create_bd_port -dir O -from 0 -to 0 rgb_led_o ]
+  set rgb_led_o [ create_bd_port -dir O -from 0 -to 0 rgb_led_o ]
+
+  # Create instance: axi_mem_intercon, and set properties
+  set axi_mem_intercon [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 axi_mem_intercon ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {1} \
+ ] $axi_mem_intercon
+
+  # Create instance: axi_vdma_0, and set properties
+  set axi_vdma_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_vdma:6.3 axi_vdma_0 ]
+  set_property -dict [ list \
+   CONFIG.c_include_mm2s_dre {1} \
+   CONFIG.c_include_s2mm {0} \
+   CONFIG.c_m_axis_mm2s_tdata_width {32} \
+   CONFIG.c_s2mm_genlock_mode {0} \
+   CONFIG.c_use_mm2s_fsync {0} \
+ ] $axi_vdma_0
 
   # Create instance: axis_lcd_interface_v_0, and set properties
   set axis_lcd_interface_v_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:axis_lcd_interface_v1_0:1.0 axis_lcd_interface_v_0 ]
@@ -29,18 +44,6 @@
    CONFIG.TVP_COUNT {2112} \
    CONFIG.V_PIXEL_COUNT {480} \
  ] $axis_lcd_interface_v_0
-
-  # Create instance: axisv_tpg_v1_0_0, and set properties
-  set axisv_tpg_v1_0_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:axisv_tpg_v1_0:1.0 axisv_tpg_v1_0_0 ]
-
-  # Create instance: blinker_v1_0_0, and set properties
-  set blinker_v1_0_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:blinker_v1_0:1.0 blinker_v1_0_0 ]
-
-  # Create instance: impulse_generator_v1_0, and set properties
-  set impulse_generator_v1_0 [ create_bd_cell -type ip -vlnv beeblebrox:user:impulse_generator_v1_0:1.0 impulse_generator_v1_0 ]
-  set_property -dict [ list \
-   CONFIG.C_IMPULSE_DURATION {1} \
- ] $impulse_generator_v1_0
 
   # Create instance: ps_0, and set properties
   set ps_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 ps_0 ]
@@ -152,6 +155,7 @@
    CONFIG.PCW_I2C_RESET_SELECT {Share reset pin} \
    CONFIG.PCW_IOPLL_CTRL_FBDIV {30} \
    CONFIG.PCW_IO_IO_PLL_FREQMHZ {1000.000} \
+   CONFIG.PCW_IRQ_F2P_INTR {1} \
    CONFIG.PCW_MIO_0_DIRECTION {inout} \
    CONFIG.PCW_MIO_0_IOTYPE {LVCMOS 3.3V} \
    CONFIG.PCW_MIO_0_PULLUP {enabled} \
@@ -434,7 +438,15 @@
    CONFIG.PCW_USB1_RESET_ENABLE {0} \
    CONFIG.PCW_USB_RESET_ENABLE {1} \
    CONFIG.PCW_USB_RESET_SELECT {Share reset pin} \
+   CONFIG.PCW_USE_FABRIC_INTERRUPT {1} \
+   CONFIG.PCW_USE_S_AXI_HP0 {1} \
  ] $ps_0
+
+  # Create instance: ps_0_axi_periph, and set properties
+  set ps_0_axi_periph [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_interconnect:2.1 ps_0_axi_periph ]
+  set_property -dict [ list \
+   CONFIG.NUM_MI {1} \
+ ] $ps_0_axi_periph
 
   # Create instance: rst_system_33M, and set properties
   set rst_system_33M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_system_33M ]
@@ -445,52 +457,42 @@
    CONFIG.C_BRAM_CNT {1.5} \
    CONFIG.C_DATA_DEPTH {2048} \
    CONFIG.C_MON_TYPE {MIX} \
-   CONFIG.C_NUM_MONITOR_SLOTS {1} \
+   CONFIG.C_NUM_MONITOR_SLOTS {2} \
    CONFIG.C_NUM_OF_PROBES {4} \
    CONFIG.C_PROBE0_TYPE {0} \
    CONFIG.C_PROBE1_TYPE {0} \
    CONFIG.C_PROBE2_TYPE {0} \
    CONFIG.C_PROBE3_TYPE {0} \
+   CONFIG.C_SLOT {1} \
    CONFIG.C_SLOT_0_APC_EN {0} \
    CONFIG.C_SLOT_0_AXI_DATA_SEL {1} \
    CONFIG.C_SLOT_0_AXI_TRIG_SEL {1} \
    CONFIG.C_SLOT_0_INTF_TYPE {xilinx.com:interface:axis_rtl:1.0} \
  ] $system_ila_0
 
-  # Create instance: xlconstant_0, and set properties
-  set xlconstant_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconstant:1.1 xlconstant_0 ]
-
-  # Create instance: xlslice_0, and set properties
-  set xlslice_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlslice:1.0 xlslice_0 ]
-  set_property -dict [ list \
-   CONFIG.DIN_FROM {6} \
-   CONFIG.DIN_TO {6} \
-   CONFIG.DIN_WIDTH {8} \
-   CONFIG.DOUT_WIDTH {1} \
- ] $xlslice_0
-
   # Create interface connections
-  connect_bd_intf_net -intf_net axisv_tpg_v1_0_0_M_AXIS [get_bd_intf_pins axis_lcd_interface_v_0/M_AXIS] [get_bd_intf_pins axisv_tpg_v1_0_0/M_AXIS]
-connect_bd_intf_net -intf_net [get_bd_intf_nets axisv_tpg_v1_0_0_M_AXIS] [get_bd_intf_pins axisv_tpg_v1_0_0/M_AXIS] [get_bd_intf_pins system_ila_0/SLOT_0_AXIS]
+  connect_bd_intf_net -intf_net axi_mem_intercon_M00_AXI [get_bd_intf_pins axi_mem_intercon/M00_AXI] [get_bd_intf_pins ps_0/S_AXI_HP0]
+  connect_bd_intf_net -intf_net axi_vdma_0_M_AXI_MM2S [get_bd_intf_pins axi_mem_intercon/S00_AXI] [get_bd_intf_pins axi_vdma_0/M_AXI_MM2S]
+connect_bd_intf_net -intf_net [get_bd_intf_nets axi_vdma_0_M_AXI_MM2S] [get_bd_intf_pins axi_vdma_0/M_AXI_MM2S] [get_bd_intf_pins system_ila_0/SLOT_1_AXI]
+  connect_bd_intf_net -intf_net axisv_tpg_v1_0_0_M_AXIS [get_bd_intf_pins axi_vdma_0/M_AXIS_MM2S] [get_bd_intf_pins axis_lcd_interface_v_0/S_AXIS]
+connect_bd_intf_net -intf_net [get_bd_intf_nets axisv_tpg_v1_0_0_M_AXIS] [get_bd_intf_pins axi_vdma_0/M_AXIS_MM2S] [get_bd_intf_pins system_ila_0/SLOT_0_AXIS]
   connect_bd_intf_net -intf_net ps_0_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins ps_0/DDR]
   connect_bd_intf_net -intf_net ps_0_FIXED_IO [get_bd_intf_ports FIXED_IO] [get_bd_intf_pins ps_0/FIXED_IO]
+  connect_bd_intf_net -intf_net ps_0_M_AXI_GP0 [get_bd_intf_pins ps_0/M_AXI_GP0] [get_bd_intf_pins ps_0_axi_periph/S00_AXI]
+  connect_bd_intf_net -intf_net ps_0_axi_periph_M00_AXI [get_bd_intf_pins axi_vdma_0/S_AXI_LITE] [get_bd_intf_pins ps_0_axi_periph/M00_AXI]
 
   # Create port connections
-  connect_bd_net -net axis_lcd_interface_v_0_enable_o [get_bd_ports enable_o_0] [get_bd_pins axis_lcd_interface_v_0/enable_o] [get_bd_pins system_ila_0/probe0]
+  connect_bd_net -net axi_vdma_0_mm2s_introut [get_bd_pins axi_vdma_0/mm2s_introut] [get_bd_pins ps_0/IRQ_F2P] [get_bd_pins system_ila_0/probe2]
+  connect_bd_net -net axis_lcd_interface_v_0_enable_o [get_bd_pins axis_lcd_interface_v_0/enable_o] [get_bd_pins system_ila_0/probe0]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets axis_lcd_interface_v_0_enable_o]
   connect_bd_net -net axis_lcd_interface_v_0_lcd_dat_o [get_bd_ports lcd_dat_o_0] [get_bd_pins axis_lcd_interface_v_0/lcd_dat_o] [get_bd_pins system_ila_0/probe1]
   set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets axis_lcd_interface_v_0_lcd_dat_o]
-  connect_bd_net -net blinker_v1_0_0_led [get_bd_pins blinker_v1_0_0/led] [get_bd_pins system_ila_0/probe3] [get_bd_pins xlslice_0/Din]
-  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets blinker_v1_0_0_led]
-  connect_bd_net -net ps_0_FCLK_CLK0 [get_bd_pins ps_0/FCLK_CLK0] [get_bd_pins ps_0/M_AXI_GP0_ACLK]
-  connect_bd_net -net ps_0_FCLK_CLK1 [get_bd_ports lcd_clk] [get_bd_pins axis_lcd_interface_v_0/aclk_i] [get_bd_pins axisv_tpg_v1_0_0/aclk_i] [get_bd_pins blinker_v1_0_0/aclk] [get_bd_pins impulse_generator_v1_0/clk] [get_bd_pins ps_0/FCLK_CLK1] [get_bd_pins rst_system_33M/slowest_sync_clk] [get_bd_pins system_ila_0/clk]
+  connect_bd_net -net ps_0_FCLK_CLK1 [get_bd_ports lcd_clk] [get_bd_pins axi_mem_intercon/ACLK] [get_bd_pins axi_mem_intercon/M00_ACLK] [get_bd_pins axi_mem_intercon/S00_ACLK] [get_bd_pins axi_vdma_0/m_axi_mm2s_aclk] [get_bd_pins axi_vdma_0/m_axis_mm2s_aclk] [get_bd_pins axi_vdma_0/s_axi_lite_aclk] [get_bd_pins axis_lcd_interface_v_0/aclk_i] [get_bd_pins ps_0/FCLK_CLK1] [get_bd_pins ps_0/M_AXI_GP0_ACLK] [get_bd_pins ps_0/S_AXI_HP0_ACLK] [get_bd_pins ps_0_axi_periph/ACLK] [get_bd_pins ps_0_axi_periph/M00_ACLK] [get_bd_pins ps_0_axi_periph/S00_ACLK] [get_bd_pins rst_system_33M/slowest_sync_clk] [get_bd_pins system_ila_0/clk]
   connect_bd_net -net ps_0_FCLK_RESET0_N [get_bd_pins ps_0/FCLK_RESET0_N] [get_bd_pins rst_system_33M/ext_reset_in]
-  connect_bd_net -net rst_system_33M_peripheral_aresetn [get_bd_pins axis_lcd_interface_v_0/rst_ni] [get_bd_pins axisv_tpg_v1_0_0/rst_ni] [get_bd_pins blinker_v1_0_0/arstn] [get_bd_pins rst_system_33M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
-  connect_bd_net -net rst_system_33M_peripheral_reset [get_bd_pins impulse_generator_v1_0/rst] [get_bd_pins rst_system_33M/peripheral_reset]
-  connect_bd_net -net xlslice_0_Dout [get_bd_pins axisv_tpg_v1_0_0/trigger_i] [get_bd_pins impulse_generator_v1_0/impulse] [get_bd_pins system_ila_0/probe2]
-  set_property HDL_ATTRIBUTE.DEBUG {true} [get_bd_nets xlslice_0_Dout]
-  connect_bd_net -net xlslice_0_Dout1 [get_bd_ports rgb_led_o] [get_bd_pins impulse_generator_v1_0/enable] [get_bd_pins xlslice_0/Dout]
+  connect_bd_net -net rst_system_33M_peripheral_aresetn [get_bd_pins axi_mem_intercon/ARESETN] [get_bd_pins axi_mem_intercon/M00_ARESETN] [get_bd_pins axi_mem_intercon/S00_ARESETN] [get_bd_pins axi_vdma_0/axi_resetn] [get_bd_pins axis_lcd_interface_v_0/rst_ni] [get_bd_pins ps_0_axi_periph/ARESETN] [get_bd_pins ps_0_axi_periph/M00_ARESETN] [get_bd_pins ps_0_axi_periph/S00_ARESETN] [get_bd_pins rst_system_33M/peripheral_aresetn] [get_bd_pins system_ila_0/resetn]
 
   # Create address segments
+  assign_bd_address -offset 0x00000000 -range 0x04000000 -target_address_space [get_bd_addr_spaces axi_vdma_0/Data_MM2S] [get_bd_addr_segs ps_0/S_AXI_HP0/HP0_DDR_LOWOCM] -force
+  assign_bd_address -offset 0x43000000 -range 0x00010000 -target_address_space [get_bd_addr_spaces ps_0/Data] [get_bd_addr_segs axi_vdma_0/S_AXI_LITE/Reg] -force
 
 

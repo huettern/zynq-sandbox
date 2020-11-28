@@ -208,3 +208,18 @@ ifconfig eth0 192.168.0.87 netmask 255.255.255.0
 route add default gw 192.168.0.1
 ping 8.8.8.8
 ```
+
+## Devicetree
+
+The top device tree source file `build/<project>.tree/system-top.dts` is compiled to `build/devicetree.dtb`.
+
+The top devicetree include two files:
+```
+/include/ "zynq-7000.dtsi"
+/include/ "pcw.dtsi"
+```
+
+During makefile execution for devicetree, an aditional include is added to 
+```
+boards/<board>/dts/board.dtsi
+```

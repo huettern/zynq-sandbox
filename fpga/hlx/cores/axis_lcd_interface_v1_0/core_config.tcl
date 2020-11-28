@@ -22,7 +22,7 @@ ipx::infer_bus_interface $rst xilinx.com:signal:reset_rtl:1.0 [ipx::current_core
 
 # Axi master interface
 set bus [ipx::get_bus_interfaces -of_objects $core s_axis]
-set_property NAME M_AXIS $bus
+set_property NAME S_AXIS $bus
 set_property INTERFACE_MODE slave $bus
 ipx::associate_bus_interfaces -busif S_AXIS -clock aclk_i [ipx::current_core]
 
